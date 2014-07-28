@@ -6,6 +6,7 @@ components/fancy-echo
 components/zsh
 components/functions
 components/zsh-fix
+components/zsh-completion
 components/homebrew
 components/packages
 components/start-services

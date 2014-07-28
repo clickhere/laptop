@@ -86,6 +86,14 @@ if [[ -f /etc/zshenv ]]; then
 fi
 ### end components/zsh-fix
 
+if ! grep -qs "zsh completion" ~/.zshrc; then
+  fancy_echo "Adding zsh completion ..."
+    printf "\n`curl -fsSL https://raw.githubusercontent.com/clickhere/laptop/master/content/zsh-completion`" >> ~/.zshrc
+else
+  fancy_echo "Zsh completion already exists. Skipping ..."
+fi
+### end components/zsh-completion
+
 if ! command -v brew &>/dev/null; then
   fancy_echo "Installing Homebrew, a good OS X package manager ..."
     ruby <(curl -fsS https://raw.githubusercontent.com/Homebrew/homebrew/go/install)
