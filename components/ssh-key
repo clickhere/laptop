@@ -1,2 +1,7 @@
-fancy_echo "Installing ssh key ..."
-  ssh-keygen -t rsa
+if [ ! -f "$HOME/.ssh/id_rsa.pub" ]; then
+  fancy_echo "Installing ssh key ..."
+    ssh-keygen -t rsa
+else
+  fancy_echo "SSH Key already installed. Skipping ..."
+fi
+
