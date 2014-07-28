@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+### end components/bash-shebang
+
+# Welcome to the clickherelabs laptop script! Be prepared to turn your laptop
+# into an awesome development machine.
+
+# This file is auto-generated. Do not edit it by hand unless you know what
+# you're doing. Please see 'CONTRIBUTING.md' for more information.
+### end components/header
+
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+### end components/exit-trap
+
+if [[ ! -d "$HOME/.bin/" ]]; then
+  mkdir "$HOME/.bin"
+fi
+
+if [ ! -f "$HOME/.zshrc" ]; then
+  touch $HOME/.zshrc
+fi
+
+if [[ ":$PATH:" != *":$HOME/.bin:"* ]]; then
+  printf 'export PATH="$HOME/.bin:$PATH"\n' >> ~/.zshrc
+  export PATH="$HOME/.bin:$PATH"
+fi
+### end components/check-home-bin
+
+fancy_echo() {
+  printf "\n%b\n" "$1"
+}
+### end components/fancy-echo
+
+fancy_echo "Changing your shell to zsh ..."
+  chsh -s $(which zsh)
+### end components/zsh
+
+brew_install_or_upgrade() {
+  if brew_is_installed "$1"; then
+    if brew_is_upgradable "$1"; then
+      brew upgrade "$@"
+    fi
+  else
+    brew install "$@"
+  fi
+}
+
+brew_is_installed() {
+  local NAME=$(brew_expand_alias "$1")
+
+  brew list -1 | grep -Fqx "$NAME"
+}
+
+brew_is_upgradable() {
+  local NAME=$(brew_expand_alias "$1")
+
+  local INSTALLED=$(brew ls --versions "$NAME" | awk '{print $NF}')
+  local LATEST=$(brew info "$NAME" 2>/dev/null | head -1 | awk '{gsub(/,/, ""); print $3}')
+
+  [ "$INSTALLED" != "$LATEST" ]
+}
+
+brew_expand_alias() {
+  brew info "$1" 2>/dev/null | head -1 | awk '{gsub(/:/, ""); print $1}'
+}
+
+brew_launchctl_restart() {
+  local NAME=$(brew_expand_alias "$1")
+  local DOMAIN="homebrew.mxcl.$NAME"
+  local PLIST="$DOMAIN.plist"
+
+  mkdir -p ~/Library/LaunchAgents
+  ln -sfv /usr/local/opt/$NAME/$PLIST ~/Library/LaunchAgents
+
+  if launchctl list | grep -q $DOMAIN; then
+    launchctl unload ~/Library/LaunchAgents/$PLIST >/dev/null
+  fi
+  launchctl load ~/Library/LaunchAgents/$PLIST >/dev/null
+}
+### end components/functions
+
+if [[ -f /etc/zshenv ]]; then
+  fancy_echo "Fixing OSX zsh environment bug ..."
+    sudo mv /etc/{zshenv,zshrc}
+fi
+### end components/zsh-fix
+
+if ! command -v brew &>/dev/null; then
+  fancy_echo "Installing Homebrew, a good OS X package manager ..."
+    ruby <(curl -fsS https://raw.githubusercontent.com/Homebrew/homebrew/go/install)
+
+  if ! grep -qs "recommended by brew doctor" ~/.zshrc; then
+    fancy_echo "Put Homebrew location earlier in PATH ..."
+      printf '\n# recommended by brew doctor\n' >> ~/.zshrc
+      printf 'export PATH="/usr/local/bin:$PATH"\n' >> ~/.zshrc
+      export PATH="/usr/local/bin:$PATH"
+  fi
+else
+  fancy_echo "Homebrew already installed. Skipping ..."
+fi
+
+fancy_echo "Updating Homebrew formulas ..."
+brew update
+### end components/homebrew
+
+fancy_echo "Installing Sqlite ..."
+  brew_install_or_upgrade 'sqlite'
+
+fancy_echo "Installing MySQL ..."
+  brew_install_or_upgrade 'mysql'
+
+fancy_echo "Installing Postgres ..."
+  brew_install_or_upgrade 'postgres' '--no-python'
+
+fancy_echo "Installing Redis, a good key-value database ..."
+  brew_install_or_upgrade 'redis'
+
+fancy_echo "Installing The Silver Searcher (better than ack or grep) to search the contents of files ..."
+  brew_install_or_upgrade 'the_silver_searcher'
+
+fancy_echo "Installing vim from Homebrew to get the latest version ..."
+  brew_install_or_upgrade 'vim'
+
+fancy_echo "Installing ctags, to index files for vim tab completion of methods, classes, variables ..."
+  brew_install_or_upgrade 'ctags'
+
+fancy_echo "Installing tmux, to save project state and switch between projects ..."
+  brew_install_or_upgrade 'tmux'
+
+fancy_echo "Installing reattach-to-user-namespace, for copy-paste and RubyMotion compatibility with tmux ..."
+  brew_install_or_upgrade 'reattach-to-user-namespace'
+
+fancy_echo "Installing ImageMagick, to crop and resize images ..."
+  brew_install_or_upgrade 'imagemagick'
+
+node_version="0.10"
+
+fancy_echo "Installing NVM, Node.js, and NPM, for running apps and installing JavaScript packages ..."
+  brew_install_or_upgrade 'nvm'
+
+  if ! grep -qs 'source $(brew --prefix nvm)/nvm.sh' ~/.zshrc; then
+    printf 'export PATH="$PATH:/usr/local/lib/node_modules"\n' >> ~/.zshrc
+    printf 'source $(brew --prefix nvm)/nvm.sh\n' >> ~/.zshrc
+  fi
+
+  source $(brew --prefix nvm)/nvm.sh
+  nvm install "$node_version"
+
+  fancy_echo "Setting $node_version as the global default nodejs..."
+  nvm alias default "$node_version"
+### end components/packages
+
+fancy_echo "Starting MySQL ..."
+  brew_launchctl_restart mysql
+
+fancy_echo "Starting Postgres ..."
+  brew_launchctl_restart postgresql
+### end components/start-services
+
+fancy_echo "Installing rbenv, to change Ruby versions ..."
+  brew_install_or_upgrade 'rbenv'
+
+  if ! grep -qs "rbenv init" ~/.zshrc; then
+    printf '\n# Rbenv\n' >> ~/.zshrc
+    printf 'export PATH="$HOME/.rbenv/bin:$PATH"\n' >> ~/.zshrc
+    printf 'eval "$(rbenv init - zsh --no-rehash)"\n' >> ~/.zshrc
+
+    fancy_echo "Enable shims and autocompletion ..."
+      eval "$(rbenv init - zsh)"
+  fi
+
+  export PATH="$HOME/.rbenv/bin:$PATH"
+
+fancy_echo "Installing rbenv-gem-rehash so the shell automatically picks up binaries after installing gems with binaries ..."
+  brew_install_or_upgrade 'rbenv-gem-rehash'
+
+fancy_echo "Installing rbenv-communal-gems to share gems across multiple ruby installs ..."
+  brew_install_or_upgrade 'rbenv-gem-rehash'
+
+fancy_echo "Installing ruby-build, to install Rubies ..."
+  brew_install_or_upgrade 'ruby-build'
+### end components/rbenv
+
+fancy_echo "Upgrading and linking OpenSSL ..."
+  brew_install_or_upgrade 'openssl'
+  brew unlink openssl && brew link openssl --force
+### end components/compiler-and-libraries
+
+ruby_version="2.1.2"
+
+fancy_echo "Installing Ruby $ruby_version ..."
+  rbenv install -s "$ruby_version"
+
+fancy_echo "Setting $ruby_version as global default Ruby ..."
+  rbenv global "$ruby_version"
+  rbenv rehash
+
+fancy_echo "Updating to latest Rubygems version ..."
+  gem update --system
+
+if [ ! -f "$HOME/.gemrc" ]; then
+  fancy_echo "Installing gemrc ..."
+  touch $HOME/.zshrc
+fi
+
+fancy_echo "Installing Bundler to install project-specific Ruby gems ..."
+  gem install bundler --no-document --pre
+
+fancy_echo "Installing Capistrano for Ruby deployments ..."
+  gem install capistrano -v=2.15.5
+  gem install capistrano-ext -v=1.2.1
+### end components/ruby-environment
+
+fancy_echo "Configuring Bundler for faster, parallel gem installation ..."
+  number_of_cores=$(sysctl -n hw.ncpu)
+  bundle config --global jobs $((number_of_cores - 1))
+### end components/bundler
+
+fancy_echo "Installing GitHub CLI client ..."
+  brew_install_or_upgrade 'hub'
+
+  if ! grep -qs "GITHUB_HOST" ~/.zshrc; then
+    printf '\n# Github Enterprise\n' >> ~/.zshrc
+    printf 'export GITHUB_HOST=github.clickhere.com\n' >> ~/.zshrc
+
+    fancy_echo "Enabling Github Enterprise host ..."
+      export GITHUB_HOST=github.clickhere.com
+  fi
+
+fancy_echo "Adding git alias to hub ..."
+  if ! grep -qs "hub alias" ~/.zshrc; then
+    printf '\n# Alias `git` to `hub` command\n' >> ~/.zshrc
+    printf 'eval "$(hub alias -s)"\n' >> ~/.zshrc
+
+    fancy_echo "Enabling git alias ..."
+      eval "$(hub alias -s)"
+  fi
+### end components/github
+
+if ! command -v rcup &>/dev/null; then
+  fancy_echo "Installing rcm, to manage your dotfiles ..."
+    brew tap thoughtbot/formulae
+    brew_install_or_upgrade 'rcm'
+else
+  fancy_echo "rcm already installed. Skipping ..."
+fi
+### end components/rcm
+
+fancy_echo "Installing ssh key ..."
+  ssh-keygen -t rsa
+### end components/ssh-key
+
+if [[ ! -d "$HOME/code/" ]]; then
+  mkdir "$HOME/code"
+fi
+
+### end components/workspace
+
+fancy_echo "Installing your personal additions from ~/.laptop.local ..."
+  if [[ -f ~/.laptop.local ]]; then
+    source ~/.laptop.local
+  fi
+### end components/personal-additions
+
+fancy_echo "Finished. Your laptop is ready for development."
+sleep 2
+fancy_echo "Happy Coding!"
+sleep 1
+fancy_echo "PLEASE RESTART TERMINAL FOR ALL CHANGES TO TAKE EFFECT\n\n"
+### end components/finished
+

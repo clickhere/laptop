@@ -1,0 +1,5 @@
+fancy_echo "Finished. Your laptop is ready for development."
+sleep 2
+fancy_echo "Happy Coding!"
+sleep 1
+fancy_echo "PLEASE RESTART TERMINAL FOR ALL CHANGES TO TAKE EFFECT\n\n"

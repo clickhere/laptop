@@ -1,0 +1,19 @@
+fancy_echo "Installing GitHub CLI client ..."
+  brew_install_or_upgrade 'hub'
+
+  if ! grep -qs "GITHUB_HOST" ~/.zshrc; then
+    printf '\n# Github Enterprise\n' >> ~/.zshrc
+    printf 'export GITHUB_HOST=github.clickhere.com\n' >> ~/.zshrc
+
+    fancy_echo "Enabling Github Enterprise host ..."
+      export GITHUB_HOST=github.clickhere.com
+  fi
+
+fancy_echo "Adding git alias to hub ..."
+  if ! grep -qs "hub alias" ~/.zshrc; then
+    printf '\n# Alias `git` to `hub` command\n' >> ~/.zshrc
+    printf 'eval "$(hub alias -s)"\n' >> ~/.zshrc
+
+    fancy_echo "Enabling git alias ..."
+      eval "$(hub alias -s)"
+  fi

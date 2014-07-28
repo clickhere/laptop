@@ -1,0 +1,5 @@
+fancy_echo "Starting MySQL ..."
+  brew_launchctl_restart mysql
+
+fancy_echo "Starting Postgres ..."
+  brew_launchctl_restart postgresql
