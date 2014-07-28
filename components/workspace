@@ -1,4 +1,13 @@
 if [[ ! -d "$HOME/code/" ]]; then
-  mkdir "$HOME/code"
+  fancy_echo "Creating workspace directory ..."
+    mkdir "$HOME/code"
+else
+  fancy_echo "Workspace directory already exists. Skipping ..."
 fi
 
+if ! grep -qs "workspace path" ~/.zshrc; then
+  fancy_echo "Creating workspace shortcut ..."
+    printf "\n`curl -fsSL https://raw.githubusercontent.com/clickhere/laptop/master/content/workspace-shortcut`" >> ~/.zshrc
+else
+  fancy_echo "Workspace shortcut already exists. Skipping ..."
+fi
