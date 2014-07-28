@@ -1,4 +1,4 @@
-ruby_version="2.1.2"
+ruby_version="$(curl -sSL https://raw.githubusercontent.com/clickhere/laptop/master/.ruby-version)"
 
 fancy_echo "Installing Ruby $ruby_version ..."
   rbenv install -s "$ruby_version"

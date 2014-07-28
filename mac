@@ -187,7 +187,7 @@ fancy_echo "Upgrading and linking OpenSSL ..."
   brew unlink openssl && brew link openssl --force
 ### end components/compiler-and-libraries
 
-ruby_version="2.1.2"
+ruby_version="$(curl -sSL https://raw.githubusercontent.com/clickhere/laptop/master/.ruby-version)"
 
 fancy_echo "Installing Ruby $ruby_version ..."
   rbenv install -s "$ruby_version"
@@ -252,9 +252,16 @@ fancy_echo "Installing ssh key ..."
 ### end components/ssh-key
 
 if [[ ! -d "$HOME/code/" ]]; then
-  mkdir "$HOME/code"
+  fancy_echo "Creating workspace directory ..."
+    mkdir "$HOME/code"
 fi
 
+if ! grep -qs "workspace path" ~/.zshrc; then
+  fancy_echo "Creating workspace shortcut ..."
+    printf "\n`curl -fsSL https://raw.githubusercontent.com/clickhere/laptop/master/content/workspace-shortcut`" >> ~/.zshrc
+else
+  fancy_echo "Workspace shortcut already exists. Aborting ..."
+fi
 ### end components/workspace
 
 fancy_echo "Installing your personal additions from ~/.laptop.local ..."
