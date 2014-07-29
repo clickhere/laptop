@@ -71,6 +71,11 @@ Workspace
 A directory called 'code' has been created in your home directory so all your
 projects can be saved there. This will be your "workspace".
 
+A `c` shortcut has also been created for your terminal. At the prompt, type
+the letter "c" (without quotation marks) then `SPACE` + `TAB` to list your
+workspace directories. You can then start to type a workspace directory name
+and `TAB` again to complete.
+
 Make your own customizations
 ----------------------------
 
