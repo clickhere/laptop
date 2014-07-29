@@ -208,16 +208,15 @@ fancy_echo "Updating to latest Rubygems version ..."
   gem update --system
 
 if [ ! -f "$HOME/.gemrc" ]; then
-  fancy_echo "Installing gemrc ..."
-  touch $HOME/.zshrc
+  fancy_echo "Creating gemrc ..."
+    touch $HOME/.gemrc
+    printf "\n`curl -fsSL https://raw.githubusercontent.com/clickhere/laptop/master/content/gemrc`" >> ~/.gemrc
+else
+  fancy_echo "Gemrc already exists. Skipping ..."
 fi
 
 fancy_echo "Installing Bundler to install project-specific Ruby gems ..."
   gem install bundler --no-document --pre
-
-fancy_echo "Installing Capistrano for Ruby deployments ..."
-  gem install capistrano -v=2.15.5
-  gem install capistrano-ext -v=1.2.1
 ### end components/ruby-environment
 
 fancy_echo "Configuring Bundler for faster, parallel gem installation ..."

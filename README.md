@@ -48,7 +48,6 @@ What it sets up
 * Ruby stable for writing general-purpose code
 * Bundler gem for managing Ruby libraries
 * Rails gem for writing web applications
-* Capistrano gem for deploying web applications
 * MySQL database for storing relational data
 * Postgres database for storing relational data
 * Redis for storing key-value data
