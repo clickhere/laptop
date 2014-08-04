@@ -20,6 +20,12 @@ For Mavericks (10.9): installed with the script, no prerequisite.
 
 For Yosemite (10.10): installed with the script, no prerequisite.
 
+**Mavericks and Yosemite Users**
+
+If you have already installed Xcode, you will need to install command line tools by running:
+
+    xcode-select --install
+
 Install
 -------
 
