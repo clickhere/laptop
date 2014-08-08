@@ -254,15 +254,6 @@ else
 fi
 ### end components/rcm
 
-if [ ! -f "$HOME/.ssh/id_rsa.pub" ]; then
-  fancy_echo "Installing ssh key ..."
-    ssh-keygen -t rsa
-else
-  fancy_echo "SSH Key already installed. Skipping ..."
-fi
-
-### end components/ssh-key
-
 if [[ ! -d "$HOME/code/" ]]; then
   fancy_echo "Creating workspace directory ..."
     mkdir "$HOME/code"

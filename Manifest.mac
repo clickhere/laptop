@@ -16,7 +16,6 @@ components/ruby-environment
 components/bundler
 components/github
 components/rcm
-components/ssh-key
 components/workspace
 components/personal-additions
 components/finished
